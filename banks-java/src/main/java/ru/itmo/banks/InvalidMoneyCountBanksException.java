@@ -1,6 +1,6 @@
 package ru.itmo.banks;
 
-public class InvalidMoneyCountBanksException extends Exception {
+public class InvalidMoneyCountBanksException extends RuntimeException {
     public InvalidMoneyCountBanksException() { }
 
     public InvalidMoneyCountBanksException(String message) {

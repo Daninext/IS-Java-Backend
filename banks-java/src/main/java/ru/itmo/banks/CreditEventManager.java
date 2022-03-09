@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CreditEventManager {
-    List<CreditListener> listeners = new ArrayList<>();
+    private List<CreditListener> listeners = new ArrayList<>();
 
     public void subscribe(CreditListener listener) {
         listeners.add(listener);

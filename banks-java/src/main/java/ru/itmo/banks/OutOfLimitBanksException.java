@@ -1,6 +1,6 @@
 package ru.itmo.banks;
 
-public class OutOfLimitBanksException extends Exception {
+public class OutOfLimitBanksException extends RuntimeException {
     public OutOfLimitBanksException() { }
 
     public OutOfLimitBanksException(String message) {

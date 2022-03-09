@@ -1,6 +1,6 @@
 package ru.itmo.banks;
 
-public class SameClientBanksException extends Exception {
+public class SameClientBanksException extends RuntimeException {
     public SameClientBanksException() { }
 
     public SameClientBanksException(String message) {

@@ -5,7 +5,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 public class CapitalizeEventManager {
-    List<CapitalizeListener> listeners = new ArrayList<>();
+    private List<CapitalizeListener> listeners = new ArrayList<>();
 
     public void subscribe(CapitalizeListener listener) {
         listeners.add(listener);

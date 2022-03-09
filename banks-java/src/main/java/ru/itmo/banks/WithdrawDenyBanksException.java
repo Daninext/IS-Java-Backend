@@ -1,6 +1,6 @@
 package ru.itmo.banks;
 
-public class WithdrawDenyBanksException extends Exception {
+public class WithdrawDenyBanksException extends RuntimeException {
     public WithdrawDenyBanksException() { }
 
     public WithdrawDenyBanksException(String message) {

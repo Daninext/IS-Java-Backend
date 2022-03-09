@@ -1,6 +1,6 @@
 package ru.itmo.banks;
 
-public class InvalidRegDataBanksException extends Exception {
+public class InvalidRegDataBanksException extends RuntimeException {
     public InvalidRegDataBanksException() { }
 
     public InvalidRegDataBanksException(String message) {

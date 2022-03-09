@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DebitEventManager {
-    List<DebitListener> listeners = new ArrayList<>();
+    private List<DebitListener> listeners = new ArrayList<>();
 
     public void subscribe(DebitListener listener) {
         listeners.add(listener);

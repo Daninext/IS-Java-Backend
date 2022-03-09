@@ -1,6 +1,6 @@
 package ru.itmo.banks;
 
-public class InvalidPercentagesBanksException extends Exception {
+public class InvalidPercentagesBanksException extends RuntimeException {
     public InvalidPercentagesBanksException() { }
 
     public InvalidPercentagesBanksException(String message) {
