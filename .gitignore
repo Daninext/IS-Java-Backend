@@ -1,0 +1,13 @@
+/kotiki-java/data/build/
+/kotiki-java/service/build/
+/kotiki-java/build/
+/kotiki-java/.gradle
+/kotiki-java/.idea
+/kotiki-java/lib
+/kotiki-java/build.gradle
+/kotiki-java/gradlew
+/kotiki-java/gradlew.bat
+/kotiki-java/settings.gradle
+/kotiki-java/gradle
+/kotiki-java/data/build.gradle
+/kotiki-java/service/build.gradle
