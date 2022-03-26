@@ -6,13 +6,6 @@ import java.util.*;
 @Entity
 @Table(name = "cats")
 public class Cat {
-    public enum BreedType {
-        MAINE_COON, SCOTTISH_FOLD, BENGAL
-    }
-
-    public enum ColorType {
-        BLACK, WHITE, GREY, BROWN
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'ru.itmo'
+group 'ru.itmo.kotiki-java'
 version '1.0-SNAPSHOT'
 
 repositories {

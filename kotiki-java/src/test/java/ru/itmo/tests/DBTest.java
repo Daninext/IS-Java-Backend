@@ -1,11 +1,8 @@
 package ru.itmo.tests;
 
 import org.junit.jupiter.api.*;
-import ru.itmo.data.entity.Cat;
-import ru.itmo.data.entity.Owner;
 import ru.itmo.services.Controller;
-import ru.itmo.services.serv.CatService;
-import ru.itmo.services.serv.OwnerService;
+import ru.itmo.data.entity.*;
 
 import java.util.Date;
 
@@ -17,7 +14,7 @@ public class DBTest {
         Controller controller = new Controller();
 
         Owner owner = new Owner("Steven", new Date());
-        Cat cat = new Cat("Mars", new Date(), Cat.BreedType.MAINE_COON, Cat.ColorType.BLACK, owner);
+        Cat cat = new Cat("Mars", new Date(), BreedType.MAINE_COON, ColorType.BLACK, owner);
 
         controller.addOwner(owner);
         controller.addCat(cat);
@@ -37,7 +34,7 @@ public class DBTest {
         Controller controller = new Controller();
 
         Owner owner = new Owner("Steven", new Date());
-        Cat cat = new Cat("Mars", new Date(), Cat.BreedType.BENGAL, Cat.ColorType.BLACK, owner);
+        Cat cat = new Cat("Mars", new Date(), BreedType.BENGAL, ColorType.BLACK, owner);
 
         controller.addOwner(owner);
         controller.addCat(cat);
@@ -53,12 +50,12 @@ public class DBTest {
         Controller controller = new Controller();
 
         Owner owner = new Owner("Steven", new Date());
-        Cat cat = new Cat("Mars", new Date(), Cat.BreedType.BENGAL, Cat.ColorType.BLACK, owner);
+        Cat cat = new Cat("Mars", new Date(), BreedType.BENGAL, ColorType.BLACK, owner);
 
         controller.addOwner(owner);
         controller.addCat(cat);
 
-        Cat newCat = new Cat("Kay", new Date(), Cat.BreedType.MAINE_COON, Cat.ColorType.WHITE, owner);
+        Cat newCat = new Cat("Kay", new Date(), BreedType.MAINE_COON, ColorType.WHITE, owner);
 
         controller.addCat(newCat);
         controller.addCatFriend(cat, newCat);
@@ -70,5 +67,6 @@ public class DBTest {
 
         Cat dbCat = controller.getCatById(newCat.getId());
         controller.removeCat(dbCat);
+        controller.removeOwner(owner);
     }
 }
