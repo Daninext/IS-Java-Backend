@@ -1,18 +1,28 @@
 package ru.itmo.services.serv;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import ru.itmo.data.dao.OwnerDAO;
+import ru.itmo.data.entity.Cat;
 import ru.itmo.data.entity.Owner;
-import ru.itmo.services.Controller;
 
 import java.util.Collections;
 import java.util.List;
 
-public class OwnerService extends Controller implements OwnerDAO {
+public class OwnerService implements OwnerDAO {
+    private SessionFactory sessionFactory;
+
+    public OwnerService() {
+        sessionFactory = new Configuration()
+                .addAnnotatedClass(Cat.class)
+                .addAnnotatedClass(Owner.class)
+                .buildSessionFactory();
+    }
 
     @Override
     public void add(Owner owner) {
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         session.beginTransaction();
 
         session.save(owner);
@@ -22,7 +32,7 @@ public class OwnerService extends Controller implements OwnerDAO {
 
     @Override
     public Owner getById(int id) {
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         session.beginTransaction();
 
         Owner result = session.get(Owner.class, id);
@@ -34,7 +44,7 @@ public class OwnerService extends Controller implements OwnerDAO {
 
     @Override
     public List<Owner> getAll() {
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         session.beginTransaction();
 
         List<Owner> result = session.createQuery("select a from Owner a", Owner.class).getResultList();
@@ -46,11 +56,15 @@ public class OwnerService extends Controller implements OwnerDAO {
 
     @Override
     public void remove(Owner owner) {
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = sessionFactory.getCurrentSession();
         session.beginTransaction();
 
         session.remove(owner);
 
         session.getTransaction().commit();
+    }
+
+    public SessionFactory getSessionFactory() {
+        return sessionFactory;
     }
 }

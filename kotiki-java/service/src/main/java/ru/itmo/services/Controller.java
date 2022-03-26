@@ -1,25 +1,49 @@
 package ru.itmo.services;
 
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
 import ru.itmo.data.entity.Cat;
 import ru.itmo.data.entity.Owner;
+import ru.itmo.services.serv.CatService;
+import ru.itmo.services.serv.OwnerService;
+
+import java.util.List;
 
 public class Controller {
-    private SessionFactory sessionFactory;
+    private CatService catService = new CatService();
+    private OwnerService ownerService = new OwnerService();
 
-    public Controller() {
-        sessionFactory = new Configuration()
-                .addAnnotatedClass(Owner.class)
-                .addAnnotatedClass(Cat.class)
-                .buildSessionFactory();
+    public void addCat(Cat cat) {
+        catService.add(cat);
     }
 
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
+    public void addCatFriend(Cat cat, Cat friend) {
+        catService.addFriend(cat, friend);
     }
 
-    public void close() {
-        sessionFactory.close();
+    public void addOwner(Owner owner) {
+        ownerService.add(owner);
+    }
+
+    public Cat getCatById(int id) {
+        return catService.getById(id);
+    }
+
+    public Owner getOwnerById(int id) {
+        return ownerService.getById(id);
+    }
+
+    public List<Cat> getAllCats() {
+        return catService.getAll();
+    }
+
+    public List<Owner> getAllOwners() {
+        return ownerService.getAll();
+    }
+
+    public void removeCat(Cat cat) {
+        catService.remove(cat);
+    }
+
+    public void removeOwner(Owner owner) {
+        ownerService.remove(owner);
     }
 }

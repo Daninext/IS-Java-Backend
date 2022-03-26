@@ -6,8 +6,12 @@ import java.util.*;
 @Entity
 @Table(name = "cats")
 public class Cat {
-    public enum color_type {
-        black, white, grey, brown
+    public enum BreedType {
+        MAINE_COON, SCOTTISH_FOLD, BENGAL
+    }
+
+    public enum ColorType {
+        BLACK, WHITE, GREY, BROWN
     }
 
     @Id
@@ -21,20 +25,22 @@ public class Cat {
     @Column(name = "birthday")
     private Date birthday;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "breed")
-    private String breed;
+    private BreedType breed;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER
+            , cascade = {CascadeType.ALL})
     @JoinTable (
             name = "cat_friends",
             joinColumns = @JoinColumn(name = "cat_id"),
             inverseJoinColumns = @JoinColumn(name = "friend_id")
     )
-    private List<Cat> friends;
+    private List<Cat> friends = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "color")
-    private color_type color;
+    private ColorType color;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
@@ -42,7 +48,7 @@ public class Cat {
 
     public Cat() { }
 
-    public Cat(String name, Date birthday, String breed, color_type color, Owner owner) {
+    public Cat(String name, Date birthday, BreedType breed, ColorType color, Owner owner) {
         this.name = name;
         this.birthday = birthday;
         this.breed = breed;
@@ -62,11 +68,11 @@ public class Cat {
         return birthday;
     }
 
-    public String getBreed() {
+    public BreedType getBreed() {
         return breed;
     }
 
-    public color_type getColor() {
+    public ColorType getColor() {
         return color;
     }
 
@@ -85,4 +91,12 @@ public class Cat {
     public void setOwner(Owner owner) {
         this.owner = owner;
     }
+
+    public void addFriend(Cat cat) {
+        friends.add(cat);
+    }
+
+    public void removeFriend(Cat cat) { friends.remove(cat); }
+
+    public void clearFriends() { friends.clear(); }
 }
