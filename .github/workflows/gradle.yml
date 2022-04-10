@@ -33,4 +33,5 @@ jobs:
       with:
         gradle-version: current
         build-root-directory: kotiki-java/
-    - run: gradle clean build
+        
+    - run: gradle clean build -p kotiki-java/
