@@ -32,4 +32,5 @@ jobs:
       uses: gradle/gradle-build-action@v1
       with:
         gradle-version: current
+        build-root-directory: Daninext/kotiki-java
     - run: gradle clean build
