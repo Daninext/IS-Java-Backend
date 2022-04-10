@@ -1,3 +1,4 @@
-/banks-java/out/
 *.iml
-/banks-java/.idea
+/**/out/
+/**/build/
+/**/.idea

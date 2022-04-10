@@ -1,19 +1,10 @@
 package ru.itmo.data.dao;
 
 import ru.itmo.data.entity.Cat;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
+@Repository
+public interface CatDAO extends JpaRepository<Cat, Integer> {
 
-public interface CatDAO {
-    void add(Cat cat);
-
-    void addFriend(Cat cat, Cat friend);
-
-    void removeFriend(Cat cat, Cat friend);
-
-    Cat getById(int id);
-
-    List<Cat> getAll();
-
-    void remove(Cat cat);
 }

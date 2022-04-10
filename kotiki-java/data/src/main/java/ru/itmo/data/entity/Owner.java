@@ -17,7 +17,7 @@ public class Owner {
     @Column(name = "birthday")
     private Date birthday;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(targetEntity = Cat.class, mappedBy = "owner")
     private List<Cat> cats;
 
     public Owner() { }
@@ -25,6 +25,11 @@ public class Owner {
     public Owner(String name, Date birthday) {
         this.name = name;
         this.birthday = birthday;
+    }
+
+    public void copy(Owner owner) {
+        this.name = owner.getName();
+        this.birthday = owner.getBirthday();
     }
 
     public int getId() {

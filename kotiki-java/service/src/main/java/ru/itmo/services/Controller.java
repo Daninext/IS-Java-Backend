@@ -5,18 +5,27 @@ import ru.itmo.data.entity.Owner;
 import ru.itmo.services.serv.CatService;
 import ru.itmo.services.serv.OwnerService;
 
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.List;
 
+@Deprecated
+@RestController
 public class Controller {
-    private CatService catService = new CatService();
-    private OwnerService ownerService = new OwnerService();
+    private CatService catService;
+    private OwnerService ownerService;
+
+    @Autowired
+    public Controller() {
+    }
 
     public void addCat(Cat cat) {
         catService.add(cat);
     }
 
     public void addCatFriend(Cat cat, Cat friend) {
-        catService.addFriend(cat, friend);
+        catService.addFriend(cat.getId(), friend.getId());
     }
 
     public void addOwner(Owner owner) {
@@ -39,11 +48,11 @@ public class Controller {
         return ownerService.getAll();
     }
 
-    public void removeCat(Cat cat) {
-        catService.remove(cat);
+    public void removeCat(int id) {
+        catService.remove(id);
     }
 
-    public void removeOwner(Owner owner) {
-        ownerService.remove(owner);
+    public void removeOwner(int id) {
+        ownerService.remove(id);
     }
 }

@@ -1,103 +1,102 @@
 package ru.itmo.services.serv;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
+import org.springframework.context.annotation.ComponentScan;
 import ru.itmo.data.dao.CatDAO;
-import ru.itmo.data.entity.Cat;
-import ru.itmo.data.entity.Owner;
+import ru.itmo.data.entity.*;
 
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class CatService implements CatDAO {
-    private SessionFactory sessionFactory;
+@Service
+@ComponentScan("ru.itmo.data")
+public class CatService {
 
-    public CatService() {
-        sessionFactory = new Configuration()
-                .addAnnotatedClass(Cat.class)
-                .addAnnotatedClass(Owner.class)
-                .buildSessionFactory();
+    private final CatDAO repository;
+
+    @Autowired
+    public CatService(CatDAO repository) {
+        this.repository = repository;
     }
 
-    @Override
     public void add(Cat cat) {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
-
-        session.save(cat);
-
-        session.getTransaction().commit();
+        repository.save(cat);
     }
 
-    @Override
-    public void addFriend(Cat cat, Cat friend) {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
+    public void addFriend(int id, int friendId) {
+        Cat cat = repository.getById(id);
+        Cat friend = repository.getById(friendId);
 
         cat.addFriend(friend);
         friend.addFriend(cat);
-        session.update(cat);
-        session.update(friend);
-
-        session.getTransaction().commit();
+        repository.save(cat);
+        repository.save(friend);
     }
 
-    @Override
-    public void removeFriend(Cat cat, Cat friend) {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
+    public void removeFriend(int id, int friendId) {
+        Cat cat = repository.getById(id);
+        Cat friend = repository.getById(friendId);
 
         cat.removeFriend(friend);
         friend.removeFriend(cat);
-        session.update(cat);
-        session.update(friend);
-
-        session.getTransaction().commit();
+        repository.save(cat);
+        repository.save(friend);
     }
 
-    @Override
     public Cat getById(int id) {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
-
-        Cat result = session.get(Cat.class, id);
-
-        session.getTransaction().commit();
-
-        return result;
+        return repository.getById(id);
     }
 
-    @Override
-    public List<Cat> getAll() {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
-
-        List<Cat> result = session.createQuery("select a from Cat a", Cat.class).getResultList();
-
-        session.getTransaction().commit();
-
-        return Collections.unmodifiableList(result);
-    }
-
-    @Override
-    public void remove(Cat cat) {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
-
-        for (Cat friend: cat.getFriends()) {
-            friend.removeFriend(cat);
-            session.update(friend);
+    public List<Cat> getByBreed(String breed) {
+        List<Cat> cats = new ArrayList<>();
+        for (Cat cat : getAll()) {
+            if (cat.getBreed() == BreedType.valueOf(breed))
+                cats.add(cat);
         }
 
-        cat.clearFriends();
-        session.update(cat);
-        session.remove(cat);
-
-        session.getTransaction().commit();
+        return Collections.unmodifiableList(cats);
     }
 
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
+    public List<Cat> getByColor(String color) {
+        List<Cat> cats = new ArrayList<>();
+        for (Cat cat : getAll()) {
+            if (cat.getColor() == ColorType.valueOf(color))
+                cats.add(cat);
+        }
+
+        return Collections.unmodifiableList(cats);
+    }
+
+    public List<Cat> getAll() {
+        return Collections.unmodifiableList(repository.findAll());
+    }
+
+    public boolean update(int id, Cat cat) {
+        if (repository.existsById(id)) {
+            Cat oldCat = getById(id);
+            oldCat.copy(cat);
+            repository.save(oldCat);
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean remove(int id) {
+        if (repository.existsById(id)) {
+            Cat cat = repository.getById(id);
+            for (Cat friend: cat.getFriends())
+                friend.removeFriend(cat);
+
+            repository.saveAll(cat.getFriends());
+            cat.clearFriends();
+            repository.deleteById(id);
+            return true;
+        }
+
+        return false;
     }
 }

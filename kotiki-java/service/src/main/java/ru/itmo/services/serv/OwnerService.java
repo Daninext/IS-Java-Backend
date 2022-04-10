@@ -1,70 +1,55 @@
 package ru.itmo.services.serv;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
+import org.springframework.context.annotation.ComponentScan;
 import ru.itmo.data.dao.OwnerDAO;
-import ru.itmo.data.entity.Cat;
 import ru.itmo.data.entity.Owner;
+
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
 
-public class OwnerService implements OwnerDAO {
-    private SessionFactory sessionFactory;
+@Service
+@ComponentScan("ru.itmo.data")
+public class OwnerService {
 
-    public OwnerService() {
-        sessionFactory = new Configuration()
-                .addAnnotatedClass(Cat.class)
-                .addAnnotatedClass(Owner.class)
-                .buildSessionFactory();
+    private final OwnerDAO repository;
+
+    @Autowired
+    public OwnerService(OwnerDAO repository) {
+        this.repository = repository;
     }
 
-    @Override
     public void add(Owner owner) {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
-
-        session.save(owner);
-
-        session.getTransaction().commit();
+        repository.save(owner);
     }
 
-    @Override
+    public boolean update(int id, Owner owner) {
+        if (repository.existsById(owner.getId())) {
+            Owner oldOwner = getById(id);
+            oldOwner.copy(owner);
+            repository.save(owner);
+            return true;
+        }
+
+        return false;
+    }
+
     public Owner getById(int id) {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
-
-        Owner result = session.get(Owner.class, id);
-
-        session.getTransaction().commit();
-
-        return result;
+        return repository.getById(id);
     }
 
-    @Override
     public List<Owner> getAll() {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
-
-        List<Owner> result = session.createQuery("select a from Owner a", Owner.class).getResultList();
-
-        session.getTransaction().commit();
-
-        return Collections.unmodifiableList(result);
+        return Collections.unmodifiableList(repository.findAll());
     }
 
-    @Override
-    public void remove(Owner owner) {
-        Session session = sessionFactory.getCurrentSession();
-        session.beginTransaction();
+    public boolean remove(int id) {
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
+            return true;
+        }
 
-        session.remove(owner);
-
-        session.getTransaction().commit();
-    }
-
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
+        return false;
     }
 }
