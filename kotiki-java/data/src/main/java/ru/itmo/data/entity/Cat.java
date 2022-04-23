@@ -50,6 +50,15 @@ public class Cat {
         this.owner = owner;
     }
 
+    public Cat(int id, String name, Date birthday, BreedType breed, ColorType color, Owner owner) {
+        this.id = id;
+        this.name = name;
+        this.birthday = birthday;
+        this.breed = breed;
+        this.color = color;
+        this.owner = owner;
+    }
+
     public void copy(Cat cat) {
         this.name = cat.getName();
         this.birthday = cat.getBirthday();

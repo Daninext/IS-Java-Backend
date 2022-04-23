@@ -1,7 +1,7 @@
 package ru.itmo.services.controllers;
 
 import ru.itmo.data.entity.Cat;
-import ru.itmo.services.serv.CatServiceImpl;
+import ru.itmo.services.serv.CatService;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +11,10 @@ import java.util.List;
 @RestController
 @RequestMapping("cats")
 public class CatController {
-    private CatServiceImpl catService;
+    private CatService catService;
 
     @Autowired
-    public CatController(CatServiceImpl catService) {
+    public CatController(CatService catService) {
         this.catService = catService;
     }
 

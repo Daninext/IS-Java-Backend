@@ -27,6 +27,12 @@ public class Owner {
         this.birthday = birthday;
     }
 
+    public Owner(int id, String name, Date birthday) {
+        this.id = id;
+        this.name = name;
+        this.birthday = birthday;
+    }
+
     public void copy(Owner owner) {
         this.name = owner.getName();
         this.birthday = owner.getBirthday();
