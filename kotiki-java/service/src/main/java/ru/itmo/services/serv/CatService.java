@@ -1,102 +1,25 @@
 package ru.itmo.services.serv;
 
-import org.springframework.context.annotation.ComponentScan;
-import ru.itmo.data.dao.CatDAO;
-import ru.itmo.data.entity.*;
+import ru.itmo.data.entity.Cat;
 
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-@Service
-@ComponentScan("ru.itmo.data")
-public class CatService {
+public interface CatService {
+    void add(Cat cat);
 
-    private final CatDAO repository;
+    void addFriend(int id, int friendId);
 
-    @Autowired
-    public CatService(CatDAO repository) {
-        this.repository = repository;
-    }
+    void removeFriend(int id, int friendId);
 
-    public void add(Cat cat) {
-        repository.save(cat);
-    }
+    Cat getById(int id);
 
-    public void addFriend(int id, int friendId) {
-        Cat cat = repository.getById(id);
-        Cat friend = repository.getById(friendId);
+    List<Cat> getByBreed(String breed);
 
-        cat.addFriend(friend);
-        friend.addFriend(cat);
-        repository.save(cat);
-        repository.save(friend);
-    }
+    List<Cat> getByColor(String color);
 
-    public void removeFriend(int id, int friendId) {
-        Cat cat = repository.getById(id);
-        Cat friend = repository.getById(friendId);
+    List<Cat> getAll();
 
-        cat.removeFriend(friend);
-        friend.removeFriend(cat);
-        repository.save(cat);
-        repository.save(friend);
-    }
+    boolean update(int id, Cat cat);
 
-    public Cat getById(int id) {
-        return repository.getById(id);
-    }
-
-    public List<Cat> getByBreed(String breed) {
-        List<Cat> cats = new ArrayList<>();
-        for (Cat cat : getAll()) {
-            if (cat.getBreed() == BreedType.valueOf(breed))
-                cats.add(cat);
-        }
-
-        return Collections.unmodifiableList(cats);
-    }
-
-    public List<Cat> getByColor(String color) {
-        List<Cat> cats = new ArrayList<>();
-        for (Cat cat : getAll()) {
-            if (cat.getColor() == ColorType.valueOf(color))
-                cats.add(cat);
-        }
-
-        return Collections.unmodifiableList(cats);
-    }
-
-    public List<Cat> getAll() {
-        return Collections.unmodifiableList(repository.findAll());
-    }
-
-    public boolean update(int id, Cat cat) {
-        if (repository.existsById(id)) {
-            Cat oldCat = getById(id);
-            oldCat.copy(cat);
-            repository.save(oldCat);
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean remove(int id) {
-        if (repository.existsById(id)) {
-            Cat cat = repository.getById(id);
-            for (Cat friend: cat.getFriends())
-                friend.removeFriend(cat);
-
-            repository.saveAll(cat.getFriends());
-            cat.clearFriends();
-            repository.deleteById(id);
-            return true;
-        }
-
-        return false;
-    }
+    boolean remove(int id);
 }

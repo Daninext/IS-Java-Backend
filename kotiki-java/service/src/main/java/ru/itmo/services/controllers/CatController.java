@@ -1,8 +1,7 @@
 package ru.itmo.services.controllers;
 
-import org.springframework.context.annotation.ComponentScan;
 import ru.itmo.data.entity.Cat;
-import ru.itmo.services.serv.CatService;
+import ru.itmo.services.serv.CatServiceImpl;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 @RestController
-@ComponentScan(basePackageClasses = CatService.class)
 @RequestMapping("cats")
 public class CatController {
-    private CatService catService;
+    private CatServiceImpl catService;
 
     @Autowired
-    public CatController(CatService catService) {
+    public CatController(CatServiceImpl catService) {
         this.catService = catService;
     }
 
@@ -30,6 +28,7 @@ public class CatController {
         catService.update(id, cat);
     }
 
+    // We add a new friend with a "friendId" to the list of friends of a cat with an "id"
     @PutMapping(value = "/{id}/{friendId}")
     public void addCatFriend(@PathVariable(name = "id") int id, @PathVariable(name = "friendId") int friendId) {
         if (id != friendId)

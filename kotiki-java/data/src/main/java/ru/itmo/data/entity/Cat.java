@@ -1,6 +1,5 @@
 package ru.itmo.data.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonGetter;
 
 import javax.persistence.*;

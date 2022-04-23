@@ -1,9 +1,8 @@
 package ru.itmo.services.controllers;
 
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.itmo.data.entity.Owner;
-import ru.itmo.services.serv.OwnerService;
+import ru.itmo.services.serv.OwnerServiceImpl;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 @RestController
-@ComponentScan(basePackageClasses = OwnerService.class)
 @RequestMapping("owners")
 public class OwnerController {
-    private OwnerService ownerService;
+    private OwnerServiceImpl ownerService;
 
     @Autowired
-    public OwnerController(OwnerService ownerService) {
+    public OwnerController(OwnerServiceImpl ownerService) {
         this.ownerService = ownerService;
     }
 
