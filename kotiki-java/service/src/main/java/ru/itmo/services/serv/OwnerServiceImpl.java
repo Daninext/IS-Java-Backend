@@ -1,6 +1,5 @@
 package ru.itmo.services.serv;
 
-import org.springframework.context.annotation.ComponentScan;
 import ru.itmo.data.dao.OwnerDAO;
 import ru.itmo.data.entity.Owner;
 
@@ -11,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-@ComponentScan("ru.itmo.data")
 public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerDAO repository;

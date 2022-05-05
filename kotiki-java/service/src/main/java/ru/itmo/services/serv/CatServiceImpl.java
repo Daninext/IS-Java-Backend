@@ -1,6 +1,5 @@
 package ru.itmo.services.serv;
 
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itmo.data.dao.CatDAO;
 import ru.itmo.data.entity.*;
@@ -12,7 +11,6 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-@ComponentScan("ru.itmo.data")
 public class CatServiceImpl implements CatService {
 
     private final CatDAO repository;
