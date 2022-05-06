@@ -29,7 +29,7 @@ public class CatController {
     }
 
     // We add a new friend with a "secondFriendId" to the list of friends of a cat with an "firstFriendId" and vice versa
-    @PutMapping(value = "/{firstFriendId}/{secondFriendId}")
+    @PutMapping(value = "/{firstFriendId}/addFriendship/{secondFriendId}")
     public void addCatFriend(@PathVariable(name = "firstFriendId") int id, @PathVariable(name = "secondFriendId") int friendId) {
         if (id != friendId)
             catService.addFriend(id, friendId);
