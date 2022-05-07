@@ -20,12 +20,14 @@ class OwnerServiceImplTest {
 
     @Mock
     private OwnerDAO dao;
+    @Mock
+    private UserDAO userDAO;
 
     private OwnerService ownerService;
 
     public OwnerServiceImplTest() {
         MockitoAnnotations.openMocks(this);
-        this.ownerService = new OwnerServiceImpl(dao);
+        this.ownerService = new OwnerServiceImpl(dao, userDAO);
     }
 
     @Test

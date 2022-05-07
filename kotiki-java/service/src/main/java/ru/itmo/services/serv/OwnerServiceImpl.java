@@ -6,6 +6,8 @@ import ru.itmo.data.entity.Owner;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.itmo.data.entity.RoleType;
+import ru.itmo.data.entity.User;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,14 +16,17 @@ import java.util.List;
 public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerDAO ownerRepository;
+    private final UserDAO userRepository;
 
     @Autowired
-    public OwnerServiceImpl(OwnerDAO ownerRepository) {
+    public OwnerServiceImpl(OwnerDAO ownerRepository, UserDAO userRepository) {
         this.ownerRepository = ownerRepository;
+        this.userRepository = userRepository;
     }
 
-    public void add(Owner owner) {
+    public void add(Owner owner, String login, String pass, String role) {
         ownerRepository.save(owner);
+        userRepository.save(new User(login, pass, RoleType.valueOf(role), owner));
     }
 
     public boolean update(int id, Owner owner) {

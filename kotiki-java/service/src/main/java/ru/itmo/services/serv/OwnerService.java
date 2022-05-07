@@ -5,7 +5,7 @@ import ru.itmo.data.entity.Owner;
 import java.util.List;
 
 public interface OwnerService {
-    void add(Owner owner);
+    void add(Owner owner, String login, String pass, String role);
 
     boolean update(int id, Owner owner);
 
