@@ -1,11 +1,14 @@
 package ru.itmo.services.controllers;
 
+import org.springframework.security.core.Authentication;
 import ru.itmo.data.entity.Cat;
+import ru.itmo.data.entity.User;
 import ru.itmo.services.serv.CatService;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -18,7 +21,7 @@ public class CatController {
         this.catService = catService;
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public void addCat(@RequestBody Cat cat) {
         catService.add(cat);
     }
@@ -29,7 +32,7 @@ public class CatController {
     }
 
     // We add a new friend with a "secondFriendId" to the list of friends of a cat with an "firstFriendId" and vice versa
-    @PutMapping(value = "/{firstFriendId}/addFriendship/{secondFriendId}")
+    @PutMapping(value = "/friendship/first/{firstFriendId}/second/{secondFriendId}")
     public void addCatFriend(@PathVariable(name = "firstFriendId") int id, @PathVariable(name = "secondFriendId") int friendId) {
         if (id != friendId)
             catService.addFriend(id, friendId);
@@ -55,7 +58,7 @@ public class CatController {
         return catService.getAll();
     }
 
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping(value = "delete/{id}")
     public void removeCat(@PathVariable(name = "id") int id) {
         catService.remove(id);
     }

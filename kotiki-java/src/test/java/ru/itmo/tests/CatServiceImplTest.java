@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Mock;
 import ru.itmo.data.dao.CatDAO;
+import ru.itmo.data.dao.UserDAO;
 import ru.itmo.data.entity.BreedType;
 import ru.itmo.data.entity.Cat;
 import ru.itmo.data.entity.ColorType;
@@ -21,12 +22,14 @@ class CatServiceImplTest {
 
     @Mock
     private CatDAO dao;
+    @Mock
+    private UserDAO udao;
 
     private CatService catService;
 
     public CatServiceImplTest() {
         MockitoAnnotations.openMocks(this);
-        catService = new CatServiceImpl(dao);
+        catService = new CatServiceImpl(dao, udao);
     }
 
     @Test

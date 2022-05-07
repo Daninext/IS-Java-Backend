@@ -5,6 +5,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Mock;
 
 import ru.itmo.data.dao.OwnerDAO;
+import ru.itmo.data.dao.UserDAO;
 import ru.itmo.data.entity.Owner;
 import ru.itmo.services.serv.OwnerService;
 import ru.itmo.services.serv.OwnerServiceImpl;

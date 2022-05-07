@@ -1,6 +1,7 @@
 package ru.itmo.services.serv;
 
 import ru.itmo.data.dao.OwnerDAO;
+import ru.itmo.data.dao.UserDAO;
 import ru.itmo.data.entity.Owner;
 
 import org.springframework.stereotype.Service;
@@ -12,22 +13,22 @@ import java.util.List;
 @Service
 public class OwnerServiceImpl implements OwnerService {
 
-    private final OwnerDAO repository;
+    private final OwnerDAO ownerRepository;
 
     @Autowired
-    public OwnerServiceImpl(OwnerDAO repository) {
-        this.repository = repository;
+    public OwnerServiceImpl(OwnerDAO ownerRepository) {
+        this.ownerRepository = ownerRepository;
     }
 
     public void add(Owner owner) {
-        repository.save(owner);
+        ownerRepository.save(owner);
     }
 
     public boolean update(int id, Owner owner) {
-        if (repository.existsById(owner.getId())) {
+        if (ownerRepository.existsById(owner.getId())) {
             Owner oldOwner = getById(id);
             oldOwner.copy(owner);
-            repository.save(owner);
+            ownerRepository.save(owner);
             return true;
         }
 
@@ -35,16 +36,16 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     public Owner getById(int id) {
-        return repository.getById(id);
+        return ownerRepository.getById(id);
     }
 
     public List<Owner> getAll() {
-        return Collections.unmodifiableList(repository.findAll());
+        return Collections.unmodifiableList(ownerRepository.findAll());
     }
 
     public boolean remove(int id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
+        if (ownerRepository.existsById(id)) {
+            ownerRepository.deleteById(id);
             return true;
         }
 

@@ -20,6 +20,9 @@ public class Owner {
     @OneToMany(targetEntity = Cat.class, mappedBy = "owner")
     private List<Cat> cats;
 
+    @OneToOne(mappedBy = "owner")
+    private User account;
+
     public Owner() { }
 
     public Owner(String name, Date birthday) {

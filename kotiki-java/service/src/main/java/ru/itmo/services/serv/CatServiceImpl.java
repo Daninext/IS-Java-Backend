@@ -1,70 +1,79 @@
 package ru.itmo.services.serv;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itmo.data.dao.CatDAO;
+import ru.itmo.data.dao.UserDAO;
 import ru.itmo.data.entity.*;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 @Service
 public class CatServiceImpl implements CatService {
 
-    private final CatDAO repository;
+    private final CatDAO catRepository;
+    private final UserDAO userRepository;
 
     @Autowired
-    public CatServiceImpl(CatDAO repository) {
-        this.repository = repository;
+    public CatServiceImpl(CatDAO catRepository, UserDAO userRepository) {
+        this.catRepository = catRepository;
+        this.userRepository = userRepository;
     }
 
     public void add(Cat cat) {
-        repository.save(cat);
+        catRepository.save(cat);
     }
 
     public void addFriend(int id, int friendId) {
-        Cat cat = repository.getById(id);
-        Cat friend = repository.getById(friendId);
+        Cat cat = catRepository.getById(id);
+        Cat friend = catRepository.getById(friendId);
 
         cat.addFriend(friend);
         friend.addFriend(cat);
-        repository.save(cat);
-        repository.save(friend);
+        catRepository.save(cat);
+        catRepository.save(friend);
     }
 
     public void removeFriend(int id, int friendId) {
-        Cat cat = repository.getById(id);
-        Cat friend = repository.getById(friendId);
+        Cat cat = catRepository.getById(id);
+        Cat friend = catRepository.getById(friendId);
 
         cat.removeFriend(friend);
         friend.removeFriend(cat);
-        repository.save(cat);
-        repository.save(friend);
+        catRepository.save(cat);
+        catRepository.save(friend);
     }
 
     public Cat getById(int id) {
-        return repository.getById(id);
+        return getOwnersCat(catRepository.getById(id));
     }
 
     public List<Cat> getByBreed(String breed) {
-        return Collections.unmodifiableList(repository.findCatsByBreed(BreedType.valueOf(breed)));
+        return getOwnersCats(catRepository.findCatsByBreed(BreedType.valueOf(breed)));
     }
 
     public List<Cat> getByColor(String color) {
-        return Collections.unmodifiableList(repository.findCatsByColor(ColorType.valueOf(color)));
+        return getOwnersCats(catRepository.findCatsByColor(ColorType.valueOf(color)));
     }
 
     public List<Cat> getAll() {
-        return Collections.unmodifiableList(repository.findAll());
+        return getOwnersCats(catRepository.findAll());
     }
 
     public boolean update(int id, Cat cat) {
-        if (repository.existsById(id)) {
+        if (getOwnersCat(cat) == null || getUser().getRole() != RoleType.ADMIN)
+            return false;
+
+        if (catRepository.existsById(id)) {
             Cat oldCat = getById(id);
             oldCat.copy(cat);
-            repository.save(oldCat);
+            catRepository.save(oldCat);
             return true;
         }
 
@@ -73,17 +82,44 @@ public class CatServiceImpl implements CatService {
 
     @Transactional
     public boolean remove(int id) {
-        if (repository.existsById(id)) {
-            Cat cat = repository.getById(id);
+        if (catRepository.existsById(id)) {
+            Cat cat = catRepository.getById(id);
             for (Cat friend: cat.getFriends())
                 friend.removeFriend(cat);
 
-            repository.saveAll(cat.getFriends());
+            catRepository.saveAll(cat.getFriends());
             cat.clearFriends();
-            repository.deleteById(id);
+            catRepository.deleteById(id);
             return true;
         }
 
         return false;
+    }
+
+    private User getUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = ((UserDetails) principal).getUsername();
+        return userRepository.findByUsername(username);
+    }
+
+    private List<Cat> getOwnersCats(List<Cat> allCats) {
+        User user = getUser();
+
+        List<Cat> cats = new ArrayList<Cat>();
+        for (Cat cat : allCats) {
+            if (cat.getOwner().getId() == user.getOwner().getId())
+                cats.add(cat);
+        }
+
+        return Collections.unmodifiableList(cats);
+    }
+
+    private Cat getOwnersCat(Cat cat) {
+        User user = getUser();
+
+        if (cat.getOwner().getId() == user.getOwner().getId())
+            return cat;
+
+        return null;
     }
 }
