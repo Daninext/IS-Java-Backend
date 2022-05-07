@@ -1,5 +1,7 @@
 package ru.itmo.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+
 import javax.persistence.*;
 import java.util.*;
 
@@ -22,8 +24,7 @@ public class Cat {
     @Column(name = "breed")
     private BreedType breed;
 
-    @ManyToMany(fetch = FetchType.EAGER
-            , cascade = {CascadeType.ALL})
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable (
             name = "cat_friends",
             joinColumns = @JoinColumn(name = "cat_id"),
@@ -47,6 +48,23 @@ public class Cat {
         this.breed = breed;
         this.color = color;
         this.owner = owner;
+    }
+
+    public Cat(int id, String name, Date birthday, BreedType breed, ColorType color, Owner owner) {
+        this.id = id;
+        this.name = name;
+        this.birthday = birthday;
+        this.breed = breed;
+        this.color = color;
+        this.owner = owner;
+    }
+
+    public void copy(Cat cat) {
+        this.name = cat.getName();
+        this.birthday = cat.getBirthday();
+        this.breed = cat.getBreed();
+        this.color = cat.getColor();
+        this.owner = cat.getOwner();
     }
 
     public int getId() {
@@ -73,8 +91,22 @@ public class Cat {
         return Collections.unmodifiableList(friends);
     }
 
+    @JsonGetter("friends")
+    public List<Integer> getFriendsId() {
+        List<Integer> id = new ArrayList<>();
+        for (Cat cat : friends)
+            id.add(cat.getId());
+
+        return Collections.unmodifiableList(id);
+    }
+
     public Owner getOwner() {
         return owner;
+    }
+
+    @JsonGetter("owner")
+    public int getOwnerId() {
+        return  owner.getId();
     }
 
     public void setName(String name) {

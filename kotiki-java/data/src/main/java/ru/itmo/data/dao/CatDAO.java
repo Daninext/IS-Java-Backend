@@ -1,19 +1,16 @@
 package ru.itmo.data.dao;
 
+import ru.itmo.data.entity.BreedType;
 import ru.itmo.data.entity.Cat;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import ru.itmo.data.entity.ColorType;
 
 import java.util.List;
 
-public interface CatDAO {
-    void add(Cat cat);
+@Repository
+public interface CatDAO extends JpaRepository<Cat, Integer> {
+    List<Cat> findCatsByBreed(BreedType breed);
 
-    void addFriend(Cat cat, Cat friend);
-
-    void removeFriend(Cat cat, Cat friend);
-
-    Cat getById(int id);
-
-    List<Cat> getAll();
-
-    void remove(Cat cat);
+    List<Cat> findCatsByColor(ColorType color);
 }
