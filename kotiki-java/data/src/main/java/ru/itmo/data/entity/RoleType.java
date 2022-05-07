@@ -1,15 +1,12 @@
 package ru.itmo.data.entity;
 
-public enum RoleType {
-    USER("USER"), ADMIN("ADMIN");
+import org.springframework.security.core.GrantedAuthority;
 
-    String role;
+public enum RoleType implements GrantedAuthority {
+    USER, ADMIN;
 
-    private RoleType(final String role){
-        this.role = role;
-    }
-
-    public String getRole(){
-        return role;
+    @Override
+    public String getAuthority() {
+        return name();
     }
 }

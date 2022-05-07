@@ -67,7 +67,7 @@ public class CatServiceImpl implements CatService {
     }
 
     public boolean update(int id, Cat cat) {
-        if (getOwnersCat(cat) == null || getUser().getRole() != RoleType.ADMIN)
+        if (getOwnersCat(cat) == null || !getUser().getAuthorities().contains(RoleType.ADMIN))
             return false;
 
         if (catRepository.existsById(id)) {
@@ -104,7 +104,7 @@ public class CatServiceImpl implements CatService {
 
     private List<Cat> getOwnersCats(List<Cat> allCats) {
         User user = getUser();
-        if (user.getRole() == RoleType.ADMIN)
+        if (user.getAuthorities().contains(RoleType.ADMIN))
             return allCats;
 
         List<Cat> cats = new ArrayList<Cat>();
@@ -118,7 +118,7 @@ public class CatServiceImpl implements CatService {
 
     private Cat getOwnersCat(Cat cat) {
         User user = getUser();
-        if (user.getRole() == RoleType.ADMIN)
+        if (user.getAuthorities().contains(RoleType.ADMIN))
             return cat;
 
         if (cat.getOwner().getId() == user.getOwner().getId())
