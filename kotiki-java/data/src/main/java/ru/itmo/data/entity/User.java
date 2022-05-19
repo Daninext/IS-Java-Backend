@@ -1,7 +1,10 @@
 package ru.itmo.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
 import java.util.Arrays;
@@ -30,7 +33,7 @@ public class User implements UserDetails {
     private Owner owner;
 
     @Column(name = "enabled")
-    private boolean enabled;
+    private boolean enabled = true;
 
     public User() { }
 
@@ -39,6 +42,10 @@ public class User implements UserDetails {
         this.password = password;
         this.role = role;
         this.owner = owner;
+    }
+
+    public int getId() {
+        return id;
     }
 
     @Override
@@ -77,5 +84,20 @@ public class User implements UserDetails {
 
     public Owner getOwner() {
         return owner;
+    }
+
+    @JsonGetter("owner")
+    public int getOwnerId() {
+        return owner.getId();
+    }
+
+    @JsonSetter("role")
+    private void setRole(String role) {
+        this.role = RoleType.valueOf(role);
+    }
+
+    @JsonSetter("password")
+    private void setPassword(String password) {
+        this.password = new BCryptPasswordEncoder().encode(password);
     }
 }

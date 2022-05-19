@@ -1,5 +1,7 @@
 package ru.itmo.data.entity;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+
 import javax.persistence.*;
 import java.util.*;
 
@@ -59,5 +61,17 @@ public class Owner {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public User getAccount() {
+        return account;
+    }
+
+    @JsonGetter("account")
+    public int getAccountId() {
+        if (account == null)
+            return -1;
+
+        return account.getId();
     }
 }

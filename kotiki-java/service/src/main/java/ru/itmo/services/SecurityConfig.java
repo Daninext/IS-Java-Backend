@@ -33,11 +33,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/owners/**", "cats/create", "cats/delete/*", "cats/friendship/**").hasAuthority("ADMIN")
+                .antMatchers("/owners/**", "cats/friendship/**", "users/**").hasAuthority("ADMIN")
+                .antMatchers("cats/*", "cats/delete/*").hasAnyAuthority("ADMIN", "USER")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().permitAll()
                 .and()
                 .logout().permitAll();
+
+        // For Postman
+        //http.
+        //        httpBasic()
+        //        .and()
+        //        .authorizeRequests()
+        //        .antMatchers("/owners/**", "cats/friendship/**", "users/**").hasAuthority("ADMIN")
+        //        .antMatchers("cats/*", "cats/delete/*").hasAnyAuthority("ADMIN", "USER")
+        //        .and()
+        //        .csrf().disable()
+        //        .formLogin().disable();
     }
 }

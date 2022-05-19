@@ -10,7 +10,6 @@ import ru.itmo.data.entity.*;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,23 +50,40 @@ public class CatServiceImpl implements CatService {
     }
 
     public Cat getById(int id) {
-        return getOwnersCat(catRepository.getById(id));
+        User user = getUser();
+        if (user.getAuthorities().contains(RoleType.ADMIN))
+            return catRepository.getById(id);
+
+        return catRepository.getCatByIdAndOwner(id, user.getOwner());
     }
 
     public List<Cat> getByBreed(String breed) {
-        return getOwnersCats(catRepository.findCatsByBreed(BreedType.valueOf(breed)));
+        User user = getUser();
+        if (user.getAuthorities().contains(RoleType.ADMIN))
+            return Collections.unmodifiableList(catRepository.findCatsByBreed(BreedType.valueOf(breed)));
+
+        return Collections.unmodifiableList(catRepository.findCatsByOwnerAndBreed(user.getOwner(), BreedType.valueOf(breed)));
     }
 
     public List<Cat> getByColor(String color) {
-        return getOwnersCats(catRepository.findCatsByColor(ColorType.valueOf(color)));
+        User user = getUser();
+        if (user.getAuthorities().contains(RoleType.ADMIN))
+            return Collections.unmodifiableList(catRepository.findCatsByColor(ColorType.valueOf(color)));
+
+        return Collections.unmodifiableList(catRepository.findCatsByOwnerAndColor(user.getOwner(), ColorType.valueOf(color)));
     }
 
     public List<Cat> getAll() {
-        return getOwnersCats(catRepository.findAll());
+        User user = getUser();
+        if (user.getAuthorities().contains(RoleType.ADMIN))
+            return Collections.unmodifiableList(catRepository.findAll());
+
+        return Collections.unmodifiableList(catRepository.findCatsByOwner(user.getOwner()));
     }
 
     public boolean update(int id, Cat cat) {
-        if (getOwnersCat(cat) == null || !getUser().getAuthorities().contains(RoleType.ADMIN))
+        User user = getUser();
+        if (!cat.isOwner(user.getOwner()) || !user.getAuthorities().contains(RoleType.ADMIN))
             return false;
 
         if (catRepository.existsById(id)) {
@@ -100,30 +116,5 @@ public class CatServiceImpl implements CatService {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = ((UserDetails) principal).getUsername();
         return userRepository.findByUsername(username);
-    }
-
-    private List<Cat> getOwnersCats(List<Cat> allCats) {
-        User user = getUser();
-        if (user.getAuthorities().contains(RoleType.ADMIN))
-            return allCats;
-
-        List<Cat> cats = new ArrayList<Cat>();
-        for (Cat cat : allCats) {
-            if (cat.getOwner().getId() == user.getOwner().getId())
-                cats.add(cat);
-        }
-
-        return Collections.unmodifiableList(cats);
-    }
-
-    private Cat getOwnersCat(Cat cat) {
-        User user = getUser();
-        if (user.getAuthorities().contains(RoleType.ADMIN))
-            return cat;
-
-        if (cat.getOwner().getId() == user.getOwner().getId())
-            return cat;
-
-        return null;
     }
 }

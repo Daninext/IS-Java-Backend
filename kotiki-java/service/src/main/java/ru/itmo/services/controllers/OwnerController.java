@@ -1,11 +1,11 @@
 package ru.itmo.services.controllers;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.itmo.data.entity.Owner;
-import ru.itmo.services.serv.OwnerService;
-
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ru.itmo.data.entity.Owner;
+import ru.itmo.services.serv.OwnerService;
 
 import java.util.List;
 
@@ -19,12 +19,9 @@ public class OwnerController {
         this.ownerService = ownerService;
     }
 
-    @PostMapping("/create/login/{login}/password/{password}/role/{role}")
-    public void addOwner(@RequestBody Owner owner
-            , @PathVariable(name = "login") String login
-            , @PathVariable(name = "password") String pass
-            , @PathVariable(name = "role") String role) {
-        ownerService.add(owner, login, pass, role);
+    @PostMapping
+    public void addOwner(@RequestBody Owner owner) {
+        ownerService.add(owner);
     }
 
     @PutMapping(value = "/{id}")
@@ -42,7 +39,7 @@ public class OwnerController {
         return ownerService.getAll();
     }
 
-    @DeleteMapping(value = "delete/{id}")
+    @DeleteMapping(value = "/delete/{id}")
     public void removeOwner(@PathVariable(name = "id") int id) {
         ownerService.remove(id);
     }
