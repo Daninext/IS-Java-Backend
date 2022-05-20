@@ -1,14 +1,14 @@
-package ru.itmo.services.serv;
+package ru.itmo.kotiki.service.serv;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
-import ru.itmo.data.dao.CatDAO;
-import ru.itmo.data.dao.UserDAO;
-import ru.itmo.data.entity.*;
+import ru.itmo.kotiki.data.dao.CatDAO;
+import ru.itmo.kotiki.data.dao.UserDAO;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.itmo.kotiki.data.entity.*;
 
 import java.util.Collections;
 import java.util.List;

@@ -1,11 +1,11 @@
-package ru.itmo.data.dao;
+package ru.itmo.kotiki.data.dao;
 
-import ru.itmo.data.entity.BreedType;
-import ru.itmo.data.entity.Cat;
+import ru.itmo.kotiki.data.entity.BreedType;
+import ru.itmo.kotiki.data.entity.Cat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ru.itmo.data.entity.ColorType;
-import ru.itmo.data.entity.Owner;
+import ru.itmo.kotiki.data.entity.ColorType;
+import ru.itmo.kotiki.data.entity.Owner;
 
 import java.util.List;
 

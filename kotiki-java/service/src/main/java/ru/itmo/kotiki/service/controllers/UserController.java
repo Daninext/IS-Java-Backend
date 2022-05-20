@@ -1,11 +1,11 @@
-package ru.itmo.services.controllers;
+package ru.itmo.kotiki.service.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import ru.itmo.data.entity.User;
-import ru.itmo.services.serv.OwnerService;
-import ru.itmo.services.serv.UserService;
+import ru.itmo.kotiki.data.entity.User;
+import ru.itmo.kotiki.service.serv.OwnerService;
+import ru.itmo.kotiki.service.serv.UserService;
 
 @RestController
 @RequestMapping("users")

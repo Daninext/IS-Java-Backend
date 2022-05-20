@@ -1,6 +1,6 @@
-package ru.itmo.services.serv;
+package ru.itmo.kotiki.service.serv;
 
-import ru.itmo.data.entity.Owner;
+import ru.itmo.kotiki.data.entity.Owner;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
-package ru.itmo.services.serv;
+package ru.itmo.kotiki.service.serv;
 
-import ru.itmo.data.entity.User;
+import ru.itmo.kotiki.data.entity.User;
 
 public interface UserService {
     void add(User user);

@@ -1,10 +1,10 @@
-package ru.itmo.services.serv;
+package ru.itmo.kotiki.service.serv;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ru.itmo.data.dao.UserDAO;
-import ru.itmo.data.entity.User;
+import ru.itmo.kotiki.data.dao.UserDAO;
+import ru.itmo.kotiki.data.entity.User;
 
 @Service
 public class UserServiceImpl implements UserService {

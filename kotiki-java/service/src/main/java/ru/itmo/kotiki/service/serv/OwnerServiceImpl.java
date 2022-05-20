@@ -1,7 +1,7 @@
-package ru.itmo.services.serv;
+package ru.itmo.kotiki.service.serv;
 
-import ru.itmo.data.dao.OwnerDAO;
-import ru.itmo.data.entity.Owner;
+import ru.itmo.kotiki.data.dao.OwnerDAO;
+import ru.itmo.kotiki.data.entity.Owner;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;

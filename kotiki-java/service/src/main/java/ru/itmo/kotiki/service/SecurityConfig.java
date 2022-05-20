@@ -1,4 +1,4 @@
-package ru.itmo.services;
+package ru.itmo.kotiki.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -33,23 +33,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/owners/**", "cats/friendship/**", "users/**").hasAuthority("ADMIN")
-                .antMatchers("cats/*", "cats/delete/*").hasAnyAuthority("ADMIN", "USER")
+                .antMatchers("/owners/**", "/cats/friendship/**", "/users/**").hasAuthority("ADMIN")
+                .antMatchers("/cats/*", "/cats/delete/*").hasAnyAuthority("ADMIN", "USER")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().permitAll()
                 .and()
                 .logout().permitAll();
-
-        // For Postman
-        //http.
-        //        httpBasic()
-        //        .and()
-        //        .authorizeRequests()
-        //        .antMatchers("/owners/**", "cats/friendship/**", "users/**").hasAuthority("ADMIN")
-        //        .antMatchers("cats/*", "cats/delete/*").hasAnyAuthority("ADMIN", "USER")
-        //        .and()
-        //        .csrf().disable()
-        //        .formLogin().disable();
     }
 }

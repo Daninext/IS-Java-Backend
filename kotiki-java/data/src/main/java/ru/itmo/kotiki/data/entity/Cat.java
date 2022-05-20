@@ -1,4 +1,4 @@
-package ru.itmo.data.entity;
+package ru.itmo.kotiki.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 
