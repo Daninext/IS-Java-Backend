@@ -1,4 +1,4 @@
-package ru.itmo.data.entity;
+package ru.itmo.kotiki.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 
@@ -124,4 +124,8 @@ public class Cat {
     public void removeFriend(Cat cat) { friends.remove(cat); }
 
     public void clearFriends() { friends.clear(); }
+
+    public boolean isOwner(Owner owner) {
+        return this.owner == owner;
+    }
 }

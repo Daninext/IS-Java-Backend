@@ -1,4 +1,4 @@
-package ru.itmo.data.entity;
+package ru.itmo.kotiki.data.entity;
 
 public enum BreedType {
     MAINE_COON, SCOTTISH_FOLD, BENGAL

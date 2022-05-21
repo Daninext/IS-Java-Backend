@@ -1,6 +1,6 @@
-package ru.itmo.data.dao;
+package ru.itmo.kotiki.data.dao;
 
-import ru.itmo.data.entity.Owner;
+import ru.itmo.kotiki.data.entity.Owner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

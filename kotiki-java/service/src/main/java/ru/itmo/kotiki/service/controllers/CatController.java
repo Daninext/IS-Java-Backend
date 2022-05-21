@@ -1,10 +1,10 @@
-package ru.itmo.services.controllers;
-
-import ru.itmo.data.entity.Cat;
-import ru.itmo.services.serv.CatService;
+package ru.itmo.kotiki.service.controllers;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ru.itmo.kotiki.data.entity.Cat;
+import ru.itmo.kotiki.service.serv.CatService;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class CatController {
         this.catService = catService;
     }
 
-    @PostMapping
+    @PostMapping()
     public void addCat(@RequestBody Cat cat) {
         catService.add(cat);
     }
@@ -28,7 +28,6 @@ public class CatController {
         catService.update(id, cat);
     }
 
-    // We add a new friend with a "secondFriendId" to the list of friends of a cat with an "firstFriendId" and vice versa
     @PutMapping(value = "/{firstFriendId}/addFriendship/{secondFriendId}")
     public void addCatFriend(@PathVariable(name = "firstFriendId") int id, @PathVariable(name = "secondFriendId") int friendId) {
         if (id != friendId)

@@ -1,4 +1,6 @@
-package ru.itmo.data.entity;
+package ru.itmo.kotiki.data.entity;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
 
 import javax.persistence.*;
 import java.util.*;
@@ -19,6 +21,9 @@ public class Owner {
 
     @OneToMany(targetEntity = Cat.class, mappedBy = "owner")
     private List<Cat> cats;
+
+    @OneToOne(mappedBy = "owner")
+    private User account;
 
     public Owner() { }
 
@@ -56,5 +61,17 @@ public class Owner {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public User getAccount() {
+        return account;
+    }
+
+    @JsonGetter("account")
+    public int getAccountId() {
+        if (account == null)
+            return -1;
+
+        return account.getId();
     }
 }
