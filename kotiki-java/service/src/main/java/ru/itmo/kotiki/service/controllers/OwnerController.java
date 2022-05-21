@@ -39,7 +39,7 @@ public class OwnerController {
         return ownerService.getAll();
     }
 
-    @DeleteMapping(value = "/delete/{id}")
+    @DeleteMapping(value = "/{id}")
     public void removeOwner(@PathVariable(name = "id") int id) {
         ownerService.remove(id);
     }

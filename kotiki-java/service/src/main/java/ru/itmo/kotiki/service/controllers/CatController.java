@@ -54,7 +54,7 @@ public class CatController {
         return catService.getAll();
     }
 
-    @DeleteMapping(value = "delete/{id}")
+    @DeleteMapping(value = "/{id}")
     public void removeCat(@PathVariable(name = "id") int id) {
         catService.remove(id);
     }
