@@ -4,6 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
@@ -27,7 +28,9 @@ import java.util.concurrent.ExecutionException;
 @RequestMapping("cats")
 public class CatController {
 
+    //@Autowired
     private final ReplyingKafkaTemplate<String, CatBuffer, CatBuffer> kafkaTemplate;
+
     private UserService userService;
 
     @Autowired
@@ -36,10 +39,34 @@ public class CatController {
         this.userService = userService;
     }
 
+    @PostMapping()
+    public void addCat(@RequestBody Cat cat) {
+        kafkaTemplate.send("addCat", "add", new CatBuffer(null, new CatTransfer(cat)));
+    }
+
+    @PutMapping(value = "/{id}")
+    public void updateCat(@PathVariable(name = "id") int id, @RequestBody Cat cat) {
+        CatTransfer ct = new CatTransfer(cat);
+        ct.setId(id);
+        kafkaTemplate.send("updateCat", "update", new CatBuffer(getUser(), ct));
+    }
+
+    @PutMapping(value = "/{firstFriendId}/addFriendship/{secondFriendId}")
+    public void addCatFriend(@PathVariable(name = "firstFriendId") int id, @PathVariable(name = "secondFriendId") int friendId) {
+        if (id != friendId)
+            kafkaTemplate.send("addCatFriend", "addFriend", new CatBuffer(getUser(), new CatTransfer(id), new CatTransfer(friendId)));
+    }
+
+    @PutMapping(value = "/{firstFriendId}/removeFriendship/{secondFriendId}")
+    public void removeCatFriend(@PathVariable(name = "firstFriendId") int id, @PathVariable(name = "secondFriendId") int friendId) {
+        if (id != friendId)
+            kafkaTemplate.send("removeCatFriend", "removeFriend", new CatBuffer(getUser(), new CatTransfer(id), new CatTransfer(friendId)));
+    }
+
     @GetMapping(value = "/{id}")
-    public CatBuffer getCatById(@PathVariable(name = "id") int id) throws InterruptedException, ExecutionException {
+    public List<CatTransfer> getCatById(@PathVariable(name = "id") int id) throws InterruptedException, ExecutionException {
         User user = getUser();
-        ProducerRecord<String, CatBuffer> record = new ProducerRecord<>("getCatById", new CatBuffer(user.getAuthorities().toString(), user.getOwnerId(), new CatTransfer(id)));
+        ProducerRecord<String, CatBuffer> record = new ProducerRecord<>("getCatById", new CatBuffer(user, new CatTransfer(id)));
         record.headers().add(new RecordHeader(KafkaHeaders.REPLY_TOPIC, ("resultCat").getBytes()));
         RequestReplyFuture<String, CatBuffer, CatBuffer> future = kafkaTemplate.sendAndReceive(record);
 
@@ -47,7 +74,58 @@ public class CatController {
         result.getProducerRecord().headers().forEach(header -> System.out.println(header.key() + ":" + header.value().toString()));
 
         ConsumerRecord<String, CatBuffer> response = future.get();
-        return response.value();
+        return response.value().getCats();
+    }
+
+    @GetMapping
+    public List<CatTransfer> getAllCats() throws InterruptedException, ExecutionException {
+        User user = getUser();
+        ProducerRecord<String, CatBuffer> record = new ProducerRecord<>("getAllCats", new CatBuffer(user));
+        record.headers().add(new RecordHeader(KafkaHeaders.REPLY_TOPIC, ("resultCat").getBytes()));
+        RequestReplyFuture<String, CatBuffer, CatBuffer> future = kafkaTemplate.sendAndReceive(record);
+
+        SendResult<String, CatBuffer> result = future.getSendFuture().get();
+        result.getProducerRecord().headers().forEach(header -> System.out.println(header.key() + ":" + header.value().toString()));
+
+        ConsumerRecord<String, CatBuffer> response = future.get();
+        return response.value().getCats();
+    }
+
+    @GetMapping(value = "breed/{breed}")
+    public List<CatTransfer> getBreedCats(@PathVariable(name = "breed") String breed) throws InterruptedException, ExecutionException {
+        User user = getUser();
+        CatTransfer cat = new CatTransfer();
+        cat.setBreedString(breed);
+        ProducerRecord<String, CatBuffer> record = new ProducerRecord<>("getCatsByBreed", new CatBuffer(user, cat));
+        record.headers().add(new RecordHeader(KafkaHeaders.REPLY_TOPIC, ("resultCat").getBytes()));
+        RequestReplyFuture<String, CatBuffer, CatBuffer> future = kafkaTemplate.sendAndReceive(record);
+
+        SendResult<String, CatBuffer> result = future.getSendFuture().get();
+        result.getProducerRecord().headers().forEach(header -> System.out.println(header.key() + ":" + header.value().toString()));
+
+        ConsumerRecord<String, CatBuffer> response = future.get();
+        return response.value().getCats();
+    }
+
+    @GetMapping(value = "color/{color}")
+    public List<CatTransfer> getColorCats(@PathVariable(name = "color") String color) throws InterruptedException, ExecutionException {
+        User user = getUser();
+        CatTransfer cat = new CatTransfer();
+        cat.setColorString(color);
+        ProducerRecord<String, CatBuffer> record = new ProducerRecord<>("getCatsByColor", new CatBuffer(user, cat));
+        record.headers().add(new RecordHeader(KafkaHeaders.REPLY_TOPIC, ("resultCat").getBytes()));
+        RequestReplyFuture<String, CatBuffer, CatBuffer> future = kafkaTemplate.sendAndReceive(record);
+
+        SendResult<String, CatBuffer> result = future.getSendFuture().get();
+        result.getProducerRecord().headers().forEach(header -> System.out.println(header.key() + ":" + header.value().toString()));
+
+        ConsumerRecord<String, CatBuffer> response = future.get();
+        return response.value().getCats();
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public void removeCat(@PathVariable(name = "id") int id) {
+        kafkaTemplate.send("removeCat", "remove", new CatBuffer(getUser(), new CatTransfer(id)));
     }
 
     private User getUser() {
@@ -55,42 +133,4 @@ public class CatController {
         String username = ((UserDetails) principal).getUsername();
         return userService.getByUsername(username);
     }
-/*
-    @PostMapping()
-    public void addCat(@RequestBody Cat cat) {
-        catService.add(cat);
-    }
-
-    @PutMapping(value = "/{id}")
-    public void updateCat(@PathVariable(name = "id") int id, @RequestBody Cat cat) {
-        catService.update(id, cat);
-    }
-
-    @PutMapping(value = "/{firstFriendId}/addFriendship/{secondFriendId}")
-    public void addCatFriend(@PathVariable(name = "firstFriendId") int id, @PathVariable(name = "secondFriendId") int friendId) {
-        if (id != friendId)
-            catService.addFriend(id, friendId);
-    }
-
-
-
-    @GetMapping(value = "breed/{breed}")
-    public List<Cat> getBreedCats(@PathVariable(name = "breed") String breed) {
-        return catService.getByBreed(breed);
-    }
-
-    @GetMapping(value = "color/{color}")
-    public List<Cat> getColorCats(@PathVariable(name = "color") String color) {
-        return catService.getByColor(color);
-    }
-
-    @GetMapping
-    public List<Cat> getAllCats() {
-        return catService.getAll();
-    }
-
-    @DeleteMapping(value = "/{id}")
-    public void removeCat(@PathVariable(name = "id") int id) {
-        catService.remove(id);
-    }*/
 }

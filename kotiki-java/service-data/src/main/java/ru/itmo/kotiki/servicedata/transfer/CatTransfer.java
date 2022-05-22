@@ -1,6 +1,10 @@
 package ru.itmo.kotiki.servicedata.transfer;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import ru.itmo.kotiki.servicedata.entity.BreedType;
 import ru.itmo.kotiki.servicedata.entity.Cat;
+import ru.itmo.kotiki.servicedata.entity.ColorType;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,8 +14,8 @@ public class CatTransfer {
     private Integer id = -1;
     private String name = null;
     private Date birthday = new Date();
-    private String breed = null;
-    private String color = null;
+    private BreedType breed = BreedType.BENGAL;
+    private ColorType color = ColorType.BLACK;
     private List<Integer> friendsIds = new ArrayList<>();
     private Integer ownerId = -1;
 
@@ -22,8 +26,8 @@ public class CatTransfer {
         id = cat.getId();
         name = cat.getName();
         birthday = cat.getBirthday();
-        breed = cat.getBreed().toString();
-        color = cat.getColor().toString();
+        breed = cat.getBreed();
+        color = cat.getColor();
         friendsIds = new ArrayList<>(cat.getFriendsId());
         ownerId = cat.getOwner().getId();
     }
@@ -44,12 +48,32 @@ public class CatTransfer {
         return birthday;
     }
 
-    public String getBreed() {
+    public BreedType getBreed() {
         return breed;
     }
 
-    public String getColor() {
+    @JsonGetter("breed")
+    public String getBreedString() {
+        return breed.toString();
+    }
+
+    @JsonSetter("breed")
+    public void setBreedString(String breed) {
+        this.breed = BreedType.valueOf(breed);
+    }
+
+    public ColorType getColor() {
         return color;
+    }
+
+    @JsonGetter("color")
+    public String getColorString() {
+        return color.toString();
+    }
+
+    @JsonSetter("color")
+    public void setColorString(String color) {
+        this.color = ColorType.valueOf(color);
     }
 
     public int getOwnerId() {
@@ -58,5 +82,9 @@ public class CatTransfer {
 
     public List<Integer> getFriendsIds() {
         return friendsIds;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

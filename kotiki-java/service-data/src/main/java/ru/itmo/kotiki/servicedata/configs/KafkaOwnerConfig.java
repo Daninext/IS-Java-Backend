@@ -5,6 +5,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
@@ -20,16 +21,16 @@ import ru.itmo.kotiki.servicedata.transfer.OwnerBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+@EnableKafka
 @Configuration
 public class KafkaOwnerConfig {
 
-    private String groupId = "app.1";
-
+    private String groupId = "owner";
     private String replyTopic = "resultOwner";
     private String kafkaServer= "localhost:9092";
 
     @Bean
-    public Map<String, Object> producerOwnerConfigs() {
+    public Map<String, Object> ownerProducerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -39,10 +40,10 @@ public class KafkaOwnerConfig {
     }
 
     @Bean
-    public Map<String, Object> consumerOwnerConfigs() {
+    public Map<String, Object> ownerConsumerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,kafkaServer);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "app.1");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(JsonDeserializer.TYPE_MAPPINGS, "owner:ru.itmo.kotiki.servicedata.transfer.OwnerBuffer");
 
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
@@ -56,17 +57,17 @@ public class KafkaOwnerConfig {
     }
 
     @Bean
-    public ProducerFactory<String, OwnerBuffer> producerOwnerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerOwnerConfigs());
+    public ProducerFactory<String, OwnerBuffer> ownerProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(ownerProducerConfigs());
     }
 
     @Bean
-    public KafkaTemplate<String, OwnerBuffer> kafkaOwnerTemplate() {
-        return new KafkaTemplate<>(producerOwnerFactory());
+    public KafkaTemplate<String, OwnerBuffer> ownerKafkaTemplate() {
+        return new KafkaTemplate<>(ownerProducerFactory());
     }
 
     @Bean
-    public ReplyingKafkaTemplate<String, OwnerBuffer, OwnerBuffer> replyKafkaOwnerTemplate(ProducerFactory<String, OwnerBuffer> pf, KafkaMessageListenerContainer<String, OwnerBuffer> container){
+    public ReplyingKafkaTemplate<String, OwnerBuffer, OwnerBuffer> ownerReplyKafkaTemplate(ProducerFactory<String, OwnerBuffer> pf, KafkaMessageListenerContainer<String, OwnerBuffer> container){
         ReplyingKafkaTemplate<String, OwnerBuffer, OwnerBuffer> temp = new ReplyingKafkaTemplate<>(pf, container);
         temp.setSharedReplyTopic(true);
 
@@ -74,22 +75,22 @@ public class KafkaOwnerConfig {
     }
 
     @Bean
-    public KafkaMessageListenerContainer<String, OwnerBuffer> replyOwnerContainer(ConsumerFactory<String, OwnerBuffer> cf) {
+    public KafkaMessageListenerContainer<String, OwnerBuffer> ownerReplyContainer(ConsumerFactory<String, OwnerBuffer> cf) {
         ContainerProperties containerProperties = new ContainerProperties(replyTopic);
         return new KafkaMessageListenerContainer<>(cf, containerProperties);
     }
 
     @Bean
-    public ConsumerFactory<String, OwnerBuffer> consumerOwnerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerOwnerConfigs(),new StringDeserializer(),new JsonDeserializer<>(OwnerBuffer.class));
+    public ConsumerFactory<String, OwnerBuffer> ownerConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(ownerConsumerConfigs(),new StringDeserializer(),new JsonDeserializer<>(OwnerBuffer.class));
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, OwnerBuffer>> kafkaOwnerListenerContainerFactory() {
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, OwnerBuffer>> ownerKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, OwnerBuffer> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
-        factory.setConsumerFactory(consumerOwnerFactory());
-        factory.setReplyTemplate(kafkaOwnerTemplate());
+        factory.setConsumerFactory(ownerConsumerFactory());
+        factory.setReplyTemplate(ownerKafkaTemplate());
         return factory;
     }
 }

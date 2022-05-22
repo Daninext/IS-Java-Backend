@@ -6,8 +6,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -16,13 +14,13 @@ import ru.itmo.kotiki.servicedata.dao.*;
 import ru.itmo.kotiki.servicedata.entity.*;
 import ru.itmo.kotiki.servicedata.transfer.CatBuffer;
 import ru.itmo.kotiki.servicedata.transfer.CatTransfer;
-import ru.itmo.kotiki.servicedata.transfer.OwnerBuffer;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 @EnableKafka
 @Service
+@Transactional
 public class CatServiceImpl implements CatService {
 
     private final CatDAO catRepository;
@@ -32,11 +30,15 @@ public class CatServiceImpl implements CatService {
         this.catRepository = catRepository;
     }
 
-    public void add(Cat cat) {
-        catRepository.save(cat);
+    @KafkaListener(topics="addCat", groupId = "cat", containerFactory = "catKafkaListenerContainerFactory")
+    public void add(ConsumerRecord<String, CatBuffer> record) {
+        catRepository.save(new Cat(record.value().getCats().get(0)));
     }
 
-    public void addFriend(int id, int friendId) {
+    @KafkaListener(topics="addCatFriend", groupId = "cat", containerFactory = "catKafkaListenerContainerFactory")
+    public void addFriend(ConsumerRecord<String, CatBuffer> record) {
+        int id = record.value().getCats().get(0).getId();
+        int friendId = record.value().getCats().get(1).getId();
         Cat cat = catRepository.getById(id);
         Cat friend = catRepository.getById(friendId);
 
@@ -46,7 +48,10 @@ public class CatServiceImpl implements CatService {
         catRepository.save(friend);
     }
 
-    public void removeFriend(int id, int friendId) {
+    @KafkaListener(topics="removeCatFriend", groupId = "cat", containerFactory = "catKafkaListenerContainerFactory")
+    public void removeFriend(ConsumerRecord<String, CatBuffer> record) {
+        int id = record.value().getCats().get(0).getId();
+        int friendId = record.value().getCats().get(1).getId();
         Cat cat = catRepository.getById(id);
         Cat friend = catRepository.getById(friendId);
 
@@ -56,61 +61,95 @@ public class CatServiceImpl implements CatService {
         catRepository.save(friend);
     }
 
-    @KafkaListener(topics="getCatById")
+    @KafkaListener(topics="getCatById", groupId = "cat", containerFactory = "catKafkaListenerContainerFactory")
     @SendTo("resultCat")
     public CatBuffer getById(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation) {
         record.headers().add(KafkaHeaders.CORRELATION_ID, correlation);
+        System.out.println(record.value().getCats().get(0).getId());
+        if (record.value().getUser().getRole() == RoleType.ADMIN) {
+            Cat cat = catRepository.getById(record.value().getCats().get(0).getId());
+            if (cat == null)
+                return new CatBuffer(null);
+            else
+                return new CatBuffer(null, new CatTransfer(cat));
+        }
 
-        if (RoleType.valueOf(record.value().getReqRole()) == RoleType.ADMIN)
-            return new CatBuffer(null, -1, new CatTransfer(catRepository.getById(record.value().getBuffer().get(0).getId())));
-
-        return new CatBuffer(null, -1, new CatTransfer(catRepository.getCatByIdAndOwnerId(record.value().getBuffer().get(0).getId(), record.value().getReqId())));
+        Cat cat = catRepository.getCatByIdAndOwner(record.value().getCats().get(0).getId(), new Owner(record.value().getUser().getOwner()));
+        if (cat == null)
+            return new CatBuffer(null);
+        else
+            return new CatBuffer(null, new CatTransfer(cat));
     }
 
-    public List<Cat> getByBreed(String breed) {
-        /*User user = getUser();
-        if (user.getAuthorities().contains(RoleType.ADMIN))
-            return Collections.unmodifiableList(catRepository.findCatsByBreed(BreedType.valueOf(breed)));
+    @KafkaListener(topics="getAllCats", groupId = "cat", containerFactory = "catKafkaListenerContainerFactory")
+    @SendTo("resultCat")
+    public CatBuffer getAll(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation) {
+        record.headers().add(KafkaHeaders.CORRELATION_ID, correlation);
 
-        return Collections.unmodifiableList(catRepository.findCatsByOwnerAndBreed(user.getOwner(), BreedType.valueOf(breed)));*/
-        return null;
+        if (record.value().getUser().getRole() == RoleType.ADMIN) {
+            List<CatTransfer> ct = new ArrayList<>();
+            catRepository.findAll().forEach(cat -> ct.add(new CatTransfer(cat)));
+            return new CatBuffer(null, ct);
+        }
+
+        List<CatTransfer> ct = new ArrayList<>();
+        catRepository.findCatsByOwner(new Owner(record.value().getUser().getOwner())).forEach(cat -> ct.add(new CatTransfer(cat)));
+        return new CatBuffer(null, ct);
     }
 
-    public List<Cat> getByColor(String color) {
-        /*User user = getUser();
-        if (user.getAuthorities().contains(RoleType.ADMIN))
-            return Collections.unmodifiableList(catRepository.findCatsByColor(ColorType.valueOf(color)));
+    @KafkaListener(topics="getCatsByBreed", groupId = "cat", containerFactory = "catKafkaListenerContainerFactory")
+    @SendTo("resultCat")
+    public CatBuffer getByBreed(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation) {
+        record.headers().add(KafkaHeaders.CORRELATION_ID, correlation);
 
-        return Collections.unmodifiableList(catRepository.findCatsByOwnerAndColor(user.getOwner(), ColorType.valueOf(color)));*/
-        return null;
+        if (record.value().getUser().getRole() == RoleType.ADMIN) {
+            List<CatTransfer> ct = new ArrayList<>();
+            catRepository.findCatsByBreed(record.value().getCats().get(0).getBreed()).forEach(cat -> ct.add(new CatTransfer(cat)));
+            return new CatBuffer(null, ct);
+        }
+
+        List<CatTransfer> ct = new ArrayList<>();
+        catRepository.findCatsByOwnerAndBreed(new Owner(record.value().getUser().getOwner()), record.value().getCats().get(0).getBreed()).forEach(cat -> ct.add(new CatTransfer(cat)));
+        return new CatBuffer(null, ct);
     }
 
-    public List<Cat> getAll() {
-        /*User user = getUser();
-        if (user.getAuthorities().contains(RoleType.ADMIN))
-            return Collections.unmodifiableList(catRepository.findAll());
+    @KafkaListener(topics="getCatsByColor", groupId = "cat", containerFactory = "catKafkaListenerContainerFactory")
+    @SendTo("resultCat")
+    public CatBuffer getByColor(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation) {
+        record.headers().add(KafkaHeaders.CORRELATION_ID, correlation);
 
-        return Collections.unmodifiableList(catRepository.findCatsByOwner(user.getOwner()));*/
-        return null;
+        if (record.value().getUser().getRole() == RoleType.ADMIN) {
+            List<CatTransfer> ct = new ArrayList<>();
+            catRepository.findCatsByColor(record.value().getCats().get(0).getColor()).forEach(cat -> ct.add(new CatTransfer(cat)));
+            return new CatBuffer(null, ct);
+        }
+
+        List<CatTransfer> ct = new ArrayList<>();
+        catRepository.findCatsByOwnerAndColor(new Owner(record.value().getUser().getOwner()), record.value().getCats().get(0).getColor()).forEach(cat -> ct.add(new CatTransfer(cat)));
+        return new CatBuffer(null, ct);
     }
 
-    public boolean update(int id, Cat cat) {
-        /*User user = getUser();
-        if (!cat.isOwner(user.getOwner()) || !user.getAuthorities().contains(RoleType.ADMIN))
+    @KafkaListener(topics="updateCat", groupId = "cat", containerFactory = "catKafkaListenerContainerFactory")
+    public boolean update(ConsumerRecord<String, CatBuffer> record) {
+        if (record.value().getUser().getRole() != RoleType.ADMIN
+            || record.value().getCats().get(0).getOwnerId() != record.value().getUser().getOwner().getId())
             return false;
 
+        int id = record.value().getCats().get(0).getId();
         if (catRepository.existsById(id)) {
-            Cat oldCat = getById(id);
-            oldCat.copy(cat);
+            Cat oldCat = catRepository.getById(id);
+            oldCat.copy(new Cat(record.value().getCats().get(0)));
             catRepository.save(oldCat);
             return true;
-        }*/
+        }
 
         return false;
     }
 
     @Transactional
-    public boolean remove(int id) {
+    @KafkaListener(topics="removeCat", groupId = "cat", containerFactory = "catKafkaListenerContainerFactory")
+    public boolean remove(ConsumerRecord<String, CatBuffer> record) {
+        int id = record.value().getCats().get(0).getId();
         if (catRepository.existsById(id)) {
             Cat cat = catRepository.getById(id);
             for (Cat friend: cat.getFriends())

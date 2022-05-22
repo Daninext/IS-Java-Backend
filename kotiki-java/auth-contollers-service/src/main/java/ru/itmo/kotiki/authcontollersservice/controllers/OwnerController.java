@@ -4,6 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -19,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 @RequestMapping("owners")
 public class OwnerController {
 
+    //@Autowired
     private final ReplyingKafkaTemplate<String, OwnerBuffer, OwnerBuffer> kafkaTemplate;
 
     @Autowired
@@ -33,7 +35,9 @@ public class OwnerController {
 
     @PutMapping(value = "/{id}")
     public void updateOwner(@PathVariable(name = "id") int id, @RequestBody Owner owner) {
-        kafkaTemplate.send("updateOwner", "update", new OwnerBuffer(new OwnerTransfer(owner)));
+        OwnerTransfer ot = new OwnerTransfer(owner);
+        ot.setId(id);
+        kafkaTemplate.send("updateOwner", "update", new OwnerBuffer(ot));
     }
 
     @GetMapping(value = "/{id}")

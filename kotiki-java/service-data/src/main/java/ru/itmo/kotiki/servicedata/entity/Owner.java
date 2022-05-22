@@ -39,11 +39,14 @@ public class Owner {
         this.birthday = birthday;
     }
 
+    public Owner(int id) {
+        this.id = id;
+    }
+
     public Owner(OwnerTransfer ownerTransfer) {
+        this.id = ownerTransfer.getId();
         this.name = ownerTransfer.getName();
         this.birthday = ownerTransfer.getBirthday();
-        this.account = ownerTransfer.getAccount();
-        //this.cats = new ArrayList<>(ownerTransfer.getCats());
     }
 
     public void copy(Owner owner) {

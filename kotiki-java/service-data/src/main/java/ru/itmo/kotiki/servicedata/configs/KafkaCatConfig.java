@@ -5,6 +5,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
@@ -20,16 +21,17 @@ import ru.itmo.kotiki.servicedata.transfer.CatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+@EnableKafka
 @Configuration
 public class KafkaCatConfig {
 
-    private String groupId = "app.1";
+    private String groupId = "cat";
 
     private String replyTopic = "resultCat";
     private String kafkaServer= "localhost:9092";
 
     @Bean
-    public Map<String, Object> producerConfigs() {
+    public Map<String, Object> catProducerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -39,10 +41,10 @@ public class KafkaCatConfig {
     }
 
     @Bean
-    public Map<String, Object> consumerConfigs() {
+    public Map<String, Object> catConsumerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,kafkaServer);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "app.1");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(JsonDeserializer.TYPE_MAPPINGS, "cat:ru.itmo.kotiki.servicedata.transfer.CatBuffer");
 
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
@@ -56,17 +58,17 @@ public class KafkaCatConfig {
     }
 
     @Bean
-    public ProducerFactory<String, CatBuffer> producerFactory() {
-        return new DefaultKafkaProducerFactory<>(producerConfigs());
+    public ProducerFactory<String, CatBuffer> catProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(catProducerConfigs());
     }
 
     @Bean
-    public KafkaTemplate<String, CatBuffer> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+    public KafkaTemplate<String, CatBuffer> catKafkaTemplate() {
+        return new KafkaTemplate<>(catProducerFactory());
     }
 
     @Bean
-    public ReplyingKafkaTemplate<String, CatBuffer, CatBuffer> replyKafkaTemplate(ProducerFactory<String, CatBuffer> pf, KafkaMessageListenerContainer<String, CatBuffer> container){
+    public ReplyingKafkaTemplate<String, CatBuffer, CatBuffer> catReplyKafkaTemplate(ProducerFactory<String, CatBuffer> pf, KafkaMessageListenerContainer<String, CatBuffer> container){
         ReplyingKafkaTemplate<String, CatBuffer, CatBuffer> temp = new ReplyingKafkaTemplate<>(pf, container);
         temp.setSharedReplyTopic(true);
 
@@ -74,22 +76,22 @@ public class KafkaCatConfig {
     }
 
     @Bean
-    public KafkaMessageListenerContainer<String, CatBuffer> replyContainer(ConsumerFactory<String, CatBuffer> cf) {
+    public KafkaMessageListenerContainer<String, CatBuffer> catReplyContainer(ConsumerFactory<String, CatBuffer> cf) {
         ContainerProperties containerProperties = new ContainerProperties(replyTopic);
         return new KafkaMessageListenerContainer<>(cf, containerProperties);
     }
 
     @Bean
-    public ConsumerFactory<String, CatBuffer> consumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(consumerConfigs(),new StringDeserializer(),new JsonDeserializer<>(CatBuffer.class));
+    public ConsumerFactory<String, CatBuffer> catConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(catConsumerConfigs(),new StringDeserializer(),new JsonDeserializer<>(CatBuffer.class));
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, CatBuffer>> kafkaListenerContainerFactory() {
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, CatBuffer>> catKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, CatBuffer> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
-        factory.setConsumerFactory(consumerFactory());
-        factory.setReplyTemplate(kafkaTemplate());
+        factory.setConsumerFactory(catConsumerFactory());
+        factory.setReplyTemplate(catKafkaTemplate());
         return factory;
     }
 }

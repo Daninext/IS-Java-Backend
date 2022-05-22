@@ -29,30 +29,31 @@ public class OwnerServiceImpl implements OwnerService {
         this.ownerRepository = ownerRepository;
     }
 
-    @KafkaListener(topics="addOwner")
+    @KafkaListener(topics="addOwner", groupId = "owner", containerFactory = "ownerKafkaListenerContainerFactory")
     public void add(ConsumerRecord<Integer, OwnerBuffer> record) {
-        ownerRepository.save(new Owner(record.value().getBuffer().get(0)));
+        ownerRepository.save(new Owner(record.value().getOwners().get(0)));
     }
 
-    @KafkaListener(topics="updateOwner")
+    @KafkaListener(topics="updateOwner", groupId = "owner", containerFactory = "ownerKafkaListenerContainerFactory")
     public boolean update(ConsumerRecord<Integer, OwnerBuffer> record) {
-        if (ownerRepository.existsById(record.value().getBuffer().get(0).getId())) {
-            Owner oldOwner = ownerRepository.getById(record.value().getBuffer().get(0).getId());
-            oldOwner.copy(new Owner(record.value().getBuffer().get(0)));
+        if (ownerRepository.existsById(record.value().getOwners().get(0).getId())) {
+            Owner oldOwner = ownerRepository.getById(record.value().getOwners().get(0).getId());
+            oldOwner.copy(new Owner(record.value().getOwners().get(0)));
             ownerRepository.save(oldOwner);
             return true;
         }
         return false;
     }
 
-    @KafkaListener(topics="getOwnerById")
+    @KafkaListener(topics="getOwnerById", groupId = "owner", containerFactory = "ownerKafkaListenerContainerFactory")
     @SendTo("resultOwner")
     public OwnerBuffer getById(ConsumerRecord<String, OwnerBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation) {
         record.headers().add(KafkaHeaders.CORRELATION_ID, correlation);
-        return new OwnerBuffer(new OwnerTransfer(ownerRepository.getById(record.value().getBuffer().get(0).getId())));
+        System.out.println(record.value().getOwners().get(0).getId());
+        return new OwnerBuffer(new OwnerTransfer(ownerRepository.getById(record.value().getOwners().get(0).getId())));
     }
 
-    @KafkaListener(topics="getAllOwners")
+    @KafkaListener(topics="getAllOwners", groupId = "owner", containerFactory = "ownerKafkaListenerContainerFactory")
     @SendTo("resultOwner")
     public OwnerBuffer getAll(ConsumerRecord<String, OwnerBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation) {
         record.headers().add(KafkaHeaders.CORRELATION_ID, correlation);
@@ -61,9 +62,9 @@ public class OwnerServiceImpl implements OwnerService {
         return new OwnerBuffer(temp);
     }
 
-    @KafkaListener(topics="removeOwner")
+    @KafkaListener(topics="removeOwner", groupId = "owner", containerFactory = "ownerKafkaListenerContainerFactory")
     public boolean remove(ConsumerRecord<String, OwnerBuffer> record) {
-        int id = record.value().getBuffer().get(0).getId();
+        int id = record.value().getOwners().get(0).getId();
         if (ownerRepository.existsById(id)) {
             ownerRepository.deleteById(id);
             return true;

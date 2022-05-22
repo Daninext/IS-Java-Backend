@@ -1,38 +1,33 @@
 package ru.itmo.kotiki.servicedata.transfer;
 
+import ru.itmo.kotiki.servicedata.entity.User;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class CatBuffer {
-    private List<CatTransfer> buffer = new ArrayList<>();
-    private String reqRole = null;
-    private Integer reqId = 0;
+    private List<CatTransfer> cats = new ArrayList<>();
+    private UserTransfer user = null;
 
     public CatBuffer() {
     }
 
-    public CatBuffer(List<CatTransfer> buffer, String role, Integer id) {
-        this.buffer = new ArrayList<>(buffer);
-        reqRole = role;
-        reqId = id;
+    public CatBuffer(User user, List<CatTransfer> cats) {
+        this.user = new UserTransfer(user);
+        this.cats = new ArrayList<>(cats);
     }
 
-    public CatBuffer(String role, Integer id, CatTransfer... buffer) {
-        this.buffer = new ArrayList<>(Arrays.asList(buffer));
-        reqRole = role;
-        reqId = id;
+    public CatBuffer(User user, CatTransfer... cats) {
+        this.user = new UserTransfer(user);
+        this.cats = new ArrayList<>(Arrays.asList(cats));
     }
 
-    public List<CatTransfer> getBuffer() {
-        return buffer;
+    public List<CatTransfer> getCats() {
+        return cats;
     }
 
-    public String getReqRole() {
-        return reqRole;
-    }
-
-    public Integer getReqId() {
-        return reqId;
+    public UserTransfer getUser() {
+        return user;
     }
 }

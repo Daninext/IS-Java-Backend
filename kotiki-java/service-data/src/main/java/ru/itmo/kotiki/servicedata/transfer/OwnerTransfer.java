@@ -20,6 +20,9 @@ public class OwnerTransfer {
     }
 
     public OwnerTransfer(Owner owner) {
+        if (owner == null)
+            return;
+
         id = owner.getId();
         name = owner.getName();
         birthday = owner.getBirthday();
@@ -61,5 +64,9 @@ public class OwnerTransfer {
             return -1;
 
         return account;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

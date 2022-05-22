@@ -5,20 +5,20 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OwnerBuffer {
-    private List<OwnerTransfer> buffer = new ArrayList<>();
+    private List<OwnerTransfer> owners = new ArrayList<>();
 
     public OwnerBuffer() {
     }
 
-    public OwnerBuffer(OwnerTransfer... buffer) {
-        this.buffer = new ArrayList<>(Arrays.asList(buffer));
+    public OwnerBuffer(OwnerTransfer... owners) {
+        this.owners = new ArrayList<>(Arrays.asList(owners));
     }
 
-    public OwnerBuffer(List<OwnerTransfer> buffer) {
-        this.buffer = new ArrayList<>(buffer);
+    public OwnerBuffer(List<OwnerTransfer> owners) {
+        this.owners = new ArrayList<>(owners);
     }
 
-    public List<OwnerTransfer> getBuffer() {
-        return buffer;
+    public List<OwnerTransfer> getOwners() {
+        return owners;
     }
 }

@@ -37,7 +37,7 @@ public class Cat {
     @Column(name = "color")
     private ColorType color;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_id")
     private Owner owner;
 
@@ -63,9 +63,11 @@ public class Cat {
     public Cat(CatTransfer catTransfer) {
         this.name = catTransfer.getName();
         this.birthday = catTransfer.getBirthday();
-        this.breed = BreedType.valueOf(catTransfer.getBreed());
-        this.color = ColorType.valueOf(catTransfer.getColor());
-        //this.owner = catTransfer.getOwner();
+        this.breed = catTransfer.getBreed();
+        this.color = catTransfer.getColor();
+
+        if (catTransfer.getOwnerId() != -1)
+            this.owner = new Owner(catTransfer.getOwnerId());
     }
 
     public void copy(Cat cat) {

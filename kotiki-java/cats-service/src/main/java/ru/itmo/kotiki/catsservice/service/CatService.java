@@ -3,27 +3,24 @@ package ru.itmo.kotiki.catsservice.service;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
-import ru.itmo.kotiki.servicedata.entity.Cat;
 import ru.itmo.kotiki.servicedata.transfer.CatBuffer;
 
-import java.util.List;
-
 public interface CatService {
-    void add(Cat cat);
+    void add(ConsumerRecord<String, CatBuffer> record);
 
-    void addFriend(int id, int friendId);
+    void addFriend(ConsumerRecord<String, CatBuffer> record);
 
-    void removeFriend(int id, int friendId);
+    void removeFriend(ConsumerRecord<String, CatBuffer> record);
 
     CatBuffer getById(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation);
 
-    List<Cat> getByBreed(String breed);
+    CatBuffer getAll(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation);
 
-    List<Cat> getByColor(String color);
+    CatBuffer getByBreed(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation);
 
-    List<Cat> getAll();
+    CatBuffer getByColor(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation);
 
-    boolean update(int id, Cat cat);
+    boolean update(ConsumerRecord<String, CatBuffer> record);
 
-    boolean remove(int id);
+    boolean remove(ConsumerRecord<String, CatBuffer> record);
 }
