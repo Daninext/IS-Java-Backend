@@ -34,4 +34,6 @@ jobs:
         gradle-version: current
         build-root-directory: kotiki-java/
         
-    - run: gradle clean build -p kotiki-java/
+    - run: gradle clean build -p kotiki-java/auth-contollers-service
+    - run: gradle clean build -p kotiki-java/cats-service
+    - run: gradle clean build -p kotiki-java/owners-service
