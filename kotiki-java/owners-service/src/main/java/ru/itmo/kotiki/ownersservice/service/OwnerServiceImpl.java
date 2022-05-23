@@ -1,14 +1,14 @@
 package ru.itmo.kotiki.ownersservice.service;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import ru.itmo.kotiki.servicedata.dao.OwnerDAO;
 import ru.itmo.kotiki.servicedata.entity.Owner;
 import ru.itmo.kotiki.servicedata.transfer.OwnerBuffer;
@@ -17,9 +17,9 @@ import ru.itmo.kotiki.servicedata.transfer.OwnerTransfer;
 import java.util.ArrayList;
 import java.util.List;
 
-@EnableKafka
 @Service
 @Transactional
+@Component
 public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerDAO ownerRepository;
@@ -29,47 +29,51 @@ public class OwnerServiceImpl implements OwnerService {
         this.ownerRepository = ownerRepository;
     }
 
-    @KafkaListener(topics="addOwner", groupId = "owner", containerFactory = "ownerKafkaListenerContainerFactory")
-    public void add(ConsumerRecord<Integer, OwnerBuffer> record) {
-        ownerRepository.save(new Owner(record.value().getOwners().get(0)));
+    @RabbitListener(queues = "addOwner")
+    public void add(String record) throws JsonProcessingException {
+        ownerRepository.save(new Owner(jsonToOwnerBuffer(record).getOwners().get(0)));
     }
 
-    @KafkaListener(topics="updateOwner", groupId = "owner", containerFactory = "ownerKafkaListenerContainerFactory")
-    public boolean update(ConsumerRecord<Integer, OwnerBuffer> record) {
-        if (ownerRepository.existsById(record.value().getOwners().get(0).getId())) {
-            Owner oldOwner = ownerRepository.getById(record.value().getOwners().get(0).getId());
-            oldOwner.copy(new Owner(record.value().getOwners().get(0)));
+    @RabbitListener(queues = "updateOwner")
+    public boolean update(String record) throws JsonProcessingException {
+        OwnerBuffer buffer = jsonToOwnerBuffer(record);
+        if (ownerRepository.existsById(buffer.getOwners().get(0).getId())) {
+            Owner oldOwner = ownerRepository.getById(buffer.getOwners().get(0).getId());
+            oldOwner.copy(new Owner(buffer.getOwners().get(0)));
             ownerRepository.save(oldOwner);
             return true;
         }
         return false;
     }
 
-    @KafkaListener(topics="getOwnerById", groupId = "owner", containerFactory = "ownerKafkaListenerContainerFactory")
-    @SendTo("resultOwner")
-    public OwnerBuffer getById(ConsumerRecord<String, OwnerBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation) {
-        record.headers().add(KafkaHeaders.CORRELATION_ID, correlation);
-        System.out.println(record.value().getOwners().get(0).getId());
-        return new OwnerBuffer(new OwnerTransfer(ownerRepository.getById(record.value().getOwners().get(0).getId())));
+    @RabbitListener(queues = "getOwnerById")
+    public String getById(String record) throws JsonProcessingException {
+        return ownerBufferToJson(new OwnerBuffer(new OwnerTransfer(ownerRepository.getById(jsonToOwnerBuffer(record).getOwners().get(0).getId()))));
     }
 
-    @KafkaListener(topics="getAllOwners", groupId = "owner", containerFactory = "ownerKafkaListenerContainerFactory")
-    @SendTo("resultOwner")
-    public OwnerBuffer getAll(ConsumerRecord<String, OwnerBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation) {
-        record.headers().add(KafkaHeaders.CORRELATION_ID, correlation);
+    @RabbitListener(queues = "getAllOwners")
+    public String getAll(String record) throws JsonProcessingException {
         List<OwnerTransfer> temp = new ArrayList<>();
         ownerRepository.findAll().forEach(owner -> temp.add(new OwnerTransfer(owner)));
-        return new OwnerBuffer(temp);
+        return ownerBufferToJson(new OwnerBuffer(temp));
     }
 
-    @KafkaListener(topics="removeOwner", groupId = "owner", containerFactory = "ownerKafkaListenerContainerFactory")
-    public boolean remove(ConsumerRecord<String, OwnerBuffer> record) {
-        int id = record.value().getOwners().get(0).getId();
+    @RabbitListener(queues = "removeOwner")
+    public boolean remove(String record) throws JsonProcessingException {
+        int id = jsonToOwnerBuffer(record).getOwners().get(0).getId();
         if (ownerRepository.existsById(id)) {
             ownerRepository.deleteById(id);
             return true;
         }
 
         return false;
+    }
+
+    private String ownerBufferToJson(OwnerBuffer buffer) throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(buffer);
+    }
+
+    private OwnerBuffer jsonToOwnerBuffer(String json) throws JsonProcessingException {
+        return new ObjectMapper().readValue(json, OwnerBuffer.class);
     }
 }

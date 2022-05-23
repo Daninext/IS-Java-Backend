@@ -40,15 +40,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin().permitAll()
                 .and()
                 .logout().permitAll();
-
-        // For Postman
-        /*http.httpBasic()
-                .and()
-                .authorizeRequests()
-                .antMatchers("/owners/**", "cats/friendship/**", "users/**").hasAuthority("ADMIN")
-                .antMatchers("cats/*", "cats/delete/*").hasAnyAuthority("ADMIN", "USER")
-                .and()
-                .csrf().disable()
-                .formLogin().disable();*/
     }
 }

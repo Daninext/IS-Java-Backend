@@ -1,26 +1,23 @@
 package ru.itmo.kotiki.catsservice.service;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
-import ru.itmo.kotiki.servicedata.transfer.CatBuffer;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface CatService {
-    void add(ConsumerRecord<String, CatBuffer> record);
+    void add(String record) throws JsonProcessingException;
 
-    void addFriend(ConsumerRecord<String, CatBuffer> record);
+    void addFriend(String record) throws JsonProcessingException;
 
-    void removeFriend(ConsumerRecord<String, CatBuffer> record);
+    void removeFriend(String record) throws JsonProcessingException;
 
-    CatBuffer getById(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation);
+    String getById(String record) throws JsonProcessingException;
 
-    CatBuffer getAll(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation);
+    String getAll(String record) throws JsonProcessingException;
 
-    CatBuffer getByBreed(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation);
+    String getByBreed(String record) throws JsonProcessingException;
 
-    CatBuffer getByColor(ConsumerRecord<String, CatBuffer> record, @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation);
+    String getByColor(String record) throws JsonProcessingException;
 
-    boolean update(ConsumerRecord<String, CatBuffer> record);
+    boolean update(String record) throws JsonProcessingException;
 
-    boolean remove(ConsumerRecord<String, CatBuffer> record);
+    boolean remove(String record) throws JsonProcessingException;
 }
