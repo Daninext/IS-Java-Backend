@@ -1,4 +1,4 @@
-# ReadMe репозитория для лабораторных по Java
+# README файл репозитория для лабораторных по Java
 ## Lab 1
 [Ссылка на условие](https://github.com/is-tech-y24-2/labs-list#1-лабораторная)  
 [Pull request](https://github.com/is-tech-y24-2/Daninext/pull/1)
